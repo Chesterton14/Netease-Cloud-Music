@@ -1,7 +1,11 @@
 <template>
   <div class="Layout">
     <div class="main">
-      <router-view />
+      <transition name="fade-transform" mode="out-in">
+        <keep-alive>
+          <router-view />
+        </keep-alive>
+      </transition>
     </div>
     <div class="nav-bar-main">
       <TabBar />
@@ -33,6 +37,7 @@ export default {
     height: 5.5rem;
     left:0;
     bottom:0;
+    z-index:1000;
   }
 }
 

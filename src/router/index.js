@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-import Layout from '@/Layout/index.vue'
+import Layout from '@/Layout/index'
 
 Vue.use(VueRouter)
 
@@ -14,9 +14,17 @@ const routes = [
       {
         path: 'discover',
         name: '发现',
-        component: () => import('@/views/Home.vue'),
+        component: () => import('@/views/Home'),
         meta: {
           title: '主页'
+        }
+      },
+      {
+        path: 'singer',
+        name: '歌手页',
+        component: () => import('@/views/Home/singer.vue'),
+        meta: {
+          title: '歌手页'
         }
       }
     ]
@@ -80,6 +88,16 @@ const routes = [
         }
       }
     ]
+  },
+  {
+    path: '/404',
+    component: () => import('@/views/404'),
+    hidden: true
+  },
+  {
+    path: '*',
+    redirect: '/404',
+    hidden: true
   }
 ]
 

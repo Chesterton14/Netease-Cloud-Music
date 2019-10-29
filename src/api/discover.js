@@ -31,3 +31,20 @@ export function getNewestAlbum() {
     method: 'get'
   })
 }
+
+// 获取热搜列表（详细）
+export function getHotSearch() {
+  return request({
+    url: '/search/hot/detail',
+    method: 'get'
+  })
+}
+
+// 获取热门歌手
+export function getTopArtists(params) {
+  return request({
+    url: '/top/artists',
+    method: 'get',
+    params
+  })
+}

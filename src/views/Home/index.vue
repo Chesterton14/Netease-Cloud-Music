@@ -3,15 +3,21 @@
     <!-- 顶部导航 -->
     <div class="discovery-nav">
       <svg-icon v-if="!isSearch" icon-class="mike" />
-      <div v-if="isSearch" class="left-icon" @click="backToMain"><svg-icon icon-class="back" /></div>
+      <div v-if="isSearch" class="left-icon" @click="backToMain">
+        <svg-icon icon-class="back" />
+      </div>
       <input v-model="keyword" type="text" :placeholder="showKeyword" @focus="onFocus">
       <svg-icon v-if="!isSearch" icon-class="rank" class="right-icon" />
-      <div v-if="isSearch" class="left-icon" @click="toSingerPage"><svg-icon icon-class="singer" /></div>
+      <div v-if="isSearch" class="left-icon" @click="toSingerPage">
+        <svg-icon icon-class="singer" />
+      </div>
     </div>
-    <!-- 发现页主页 -->
-    <transition name="fade-transform" mode="out-in">
-      <div v-if="!isSearch" class="discovery-main">
-        <div class="swiper-container">
+    <div v-show="!isSearch" ref="wrapper" class="wrapper">
+      <div class="content">
+        <!-- <transition-group name="fade-transform" mode="out-in"> -->
+        <div class="pull-container" />
+        <div style="width:100%;height:5.5rem;background:#d81e06" />
+        <div class="swiper-container" :style="bgStyle">
           <swiper v-if="swiperSlides.length" :options="swiperOption">
             <swiper-slide v-for="(slide, index) in swiperSlides" :key="index">
               <img class="swiper-img" :src="slide.pic">
@@ -20,8 +26,8 @@
           </swiper>
         </div>
         <div class="button-container">
-          <div class="button-item" @click="toRecommendPage">
-            <div class="item-icon">
+          <div class="button-item">
+            <div class="item-icon" @click="$router.push('/dailysong')">
               <svg-icon icon-class="recommend" />
             </div>
             <span class="item-title">每日推荐</span>
@@ -76,11 +82,15 @@
           </div>
         </div>
         <div class="bottom-content" />
+        <!-- </transition-group> -->
       </div>
-    </transition>
+    </div>
+    <!-- 发现页主页 -->
+
     <!-- 搜索建议 -->
     <transition name="fade-transform" mode="out-in">
-      <div v-if="isSearch" class="search-container">
+      <div v-show="isSearch" class="search-container">
+        <div style="width:100%;height:5.5rem;" />
         <div class="search-title">热搜榜</div>
         <div class="search-list">
           <div v-for="(search,index) in hotSearchList" :key="search.score" class="search-item">
@@ -106,6 +116,7 @@
 </template>
 
 <script>
+import BScroll from 'better-scroll'
 import {
   searchDefault,
   getBanner,
@@ -141,7 +152,12 @@ export default {
       songListArray: [],
       newestAlbumList: [],
       isSearch: false,
-      hotSearchList: []
+      hotSearchList: [],
+      bgStyle: {
+        backgroundImage: 'url(' + require('../../assets/redbg.png') + ')',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: '100% 30%'
+      }
     }
   },
   created() {
@@ -157,6 +173,9 @@ export default {
       this.swiperSlides = bannerImg.banners
       this.songListArray = songList.result
       this.newestAlbumList = newestAlbum.albums.slice(0, 3)
+      this.$nextTick(() => {
+        this.scroll = new BScroll(this.$refs.wrapper, { click: true })
+      })
     },
     onFocus() {
       this.isSearch = true
@@ -170,7 +189,6 @@ export default {
     toSingerPage() {
       this.$router.push('singer')
     },
-    toRecommendPage() {},
     toSongListPage() {},
     toRankListPage() {},
     toRadioPage() {}
@@ -181,8 +199,14 @@ export default {
 <style lang="scss" scoped>
 $neteaseRed: #d81e06;
 .discovey-container {
-  margin-top: 5.5rem;
-  margin-bottom: 7.5rem;
+  position: fiex;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  .wrapper{
+    width: 100%;
+    height: 100%;
+  }
   .discovery-nav {
     position: fixed;
     top: 0;
@@ -214,13 +238,25 @@ $neteaseRed: #d81e06;
       font-size: 2.5rem;
       padding: 0 1rem;
     }
-    .left-icon{
-      margin-top:1rem;
+    .left-icon {
+      margin-top: 1rem;
     }
   }
+  .pull-container{
+    position: absolute;
+    top: -30vh;
+    z-index: -10;
+    background: #d81e06;
+    width: 100%;
+    height: 50vh;
+    vertical-align: inherit;
+  }
   .swiper-container {
+    text-align: center;
     .swiper-img {
-      width: 100%;
+      width: 90%;
+      border-radius: 5px;
+      border: none;
     }
   }
   .button-container {
@@ -305,6 +341,7 @@ $neteaseRed: #d81e06;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: #fff;
     .nav-title {
       margin-top: 1rem;
       font-size: 1.5rem;
@@ -325,6 +362,7 @@ $neteaseRed: #d81e06;
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    background: #fff;
     .newest-item {
       box-sizing: border-box;
       width: 33.33%;
@@ -350,60 +388,59 @@ $neteaseRed: #d81e06;
     width: 100%;
     height: 5rem;
   }
-  .search-container{
+  .search-container {
     width: 100%;
-    .search-title{
+    .search-title {
       padding: 2rem 2rem 1rem 2rem;
       font-size: 1.3rem;
     }
-    .search-list{
+    .search-list {
       width: 100%;
-      .search-item{
+      .search-item {
         display: flex;
         justify-content: space-between;
-        align-items:center;
+        align-items: center;
         padding: 1rem;
-        .item-left{
+        .item-left {
           display: flex;
           justify-content: flex-start;
-          align-items:center;
-          .item-rank{
+          align-items: center;
+          .item-rank {
             text-align: center;
             font-size: 1.5rem;
             width: 2rem;
             padding-right: 1.5rem;
-            color:#868686;
+            color: #868686;
           }
-          .top3{
-            color:$neteaseRed;
+          .top3 {
+            color: $neteaseRed;
           }
-          .item-main{
-            .main-search-word{
+          .item-main {
+            .main-search-word {
               font-size: 1.4rem;
               font-weight: 500;
               letter-spacing: 1px;
               padding-bottom: 0.5rem;
-              img{
-                height:1.2rem;
+              img {
+                height: 1.2rem;
               }
             }
-            .searchTop3{
-              font-weight:550;
+            .searchTop3 {
+              font-weight: 550;
             }
-            .main-search-content{
+            .main-search-content {
               font-size: 1.2rem;
-              color:#868686
+              color: #868686;
             }
           }
         }
-        .item-right{
-          .item-score{
+        .item-right {
+          .item-score {
             text-align: center;
             font-size: 1.2rem;
-            color:#868686
+            color: #868686;
           }
         }
-
       }
     }
   }

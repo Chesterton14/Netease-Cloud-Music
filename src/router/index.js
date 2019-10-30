@@ -26,6 +26,14 @@ const routes = [
         meta: {
           title: '歌手页'
         }
+      },
+      {
+        path: 'dailysong',
+        name: '每日推荐',
+        component: () => import('@/views/Home/dailySong.vue'),
+        meta: {
+          title: '每日推荐'
+        }
       }
     ]
   },

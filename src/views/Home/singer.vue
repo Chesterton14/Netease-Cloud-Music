@@ -1,9 +1,9 @@
 <template>
   <div class="singer-container">
     <div class="singer-nav">
-      <div @click="goBack"><svg-icon icon-class="back" /></div>
+      <div @click="$router.go(-1)"><svg-icon icon-class="back" /></div>
       <div class="nav-title">歌手分类</div>
-      <div @click="goBack"><svg-icon icon-class="rank" /></div>
+      <div @click="$router.go(-1)"><svg-icon icon-class="rank" /></div>
     </div>
     <div style="width:100%;height:5.5rem" />
     <div class="singer-category">
@@ -118,9 +118,6 @@ export default {
         })
         this.loading = false
       })
-    },
-    goBack() {
-      this.$router.go(-1)
     },
     selectCountry(country) {
       this.mainLoading = true

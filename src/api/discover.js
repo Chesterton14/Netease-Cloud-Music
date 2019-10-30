@@ -57,3 +57,11 @@ export function getArtistsList(params) {
     params
   })
 }
+
+// 获取每日推荐歌曲
+export function getDailySong() {
+  return request({
+    url: '/personalized/newsong?limit=20',
+    method: 'get'
+  })
+}

@@ -27,8 +27,16 @@
       </div>
     </div>
     <div class="singer-title">热门歌手</div>
-    <div v-show="!loading" class="singer-main">
-      <div v-for="singer in topSingerList" :key="singer.id" class="singer-item">
+    <div class="singer-main">
+      <div v-show="mainLoading" class="sk-chase">
+        <div class="sk-chase-dot" />
+        <div class="sk-chase-dot" />
+        <div class="sk-chase-dot" />
+        <div class="sk-chase-dot" />
+        <div class="sk-chase-dot" />
+        <div class="sk-chase-dot" />
+      </div>
+      <div v-for="singer in topSingerList" v-show="!mainLoading" :key="singer.id" class="singer-item">
         <div class="singer-pic">
           <img :src="singer.picUrl">
         </div>
@@ -40,7 +48,7 @@
         </div>
       </div>
     </div>
-    <div v-show="!loading" class="load-more" @click="loadMore(loadMoreOption)">加载更多</div>
+    <div v-show="!loading && !mainLoading" class="load-more" @click="loadMore(loadMoreOption)">加载更多</div>
     <div v-show="loading" class="sk-chase">
       <div class="sk-chase-dot" />
       <div class="sk-chase-dot" />
@@ -62,6 +70,7 @@ export default {
         offset: 0,
         limit: 20
       },
+      mainLoading: true,
       loading: false,
       topSingerList: [],
       countryList: [
@@ -90,9 +99,11 @@ export default {
   },
   created() {
     this.params.offset = 0
+    this.mainLoading = true
     getTopArtists(this.params).then(res => {
       this.topSingerList = res.artists
       this.loadMoreOption.data = res.artists
+      this.mainLoading = false
     })
   },
   methods: {
@@ -112,13 +123,13 @@ export default {
       this.$router.go(-1)
     },
     selectCountry(country) {
-      this.loading = true
+      this.mainLoading = true
       this.countryList.map(item => { item.isActive = false })
       country.isActive = true
       this.countrySelected = country.code
       getArtistsList({ cat: country.code + 1, limit: 20 }).then(res => {
         this.topSingerList = res.artists
-        this.loading = false
+        this.mainLoading = false
         this.sexList.map(item => { item.isActive = false })
         this.sexList[0].isActive = true
         this.loadMoreOption = null
@@ -136,11 +147,11 @@ export default {
     selectSex(sex) {
       this.sexList.map(item => { item.isActive = false })
       sex.isActive = true
-      this.loading = true
+      this.mainLoading = true
       this.sexSelected = sex.code
       getArtistsList({ cat: this.countrySelected + sex.code, limit: 20 }).then(res => {
         this.topSingerList = res.artists
-        this.loading = false
+        this.mainLoading = false
         this.loadMoreOption = null
         this.loadMoreOption = {
           params: {

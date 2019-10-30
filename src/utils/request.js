@@ -10,6 +10,7 @@ service.interceptors.request.use(
     return config
   },
   error => {
+    console.log(error)
     return error
   }
 )
@@ -20,6 +21,7 @@ service.interceptors.response.use(
     return res
   },
   error => {
+    console.log(error)
     return error
   }
 )

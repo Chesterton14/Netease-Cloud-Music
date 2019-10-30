@@ -27,20 +27,18 @@
       </div>
     </div>
     <div class="singer-title">热门歌手</div>
-    <div class="singer-main">
-      <transition-group name="fade-transform" mode="out-in">
-        <div v-for="singer in topSingerList" :key="singer.id" class="singer-item">
-          <div class="singer-pic">
-            <img :src="singer.picUrl">
-          </div>
-          <div class="singer-name">
-            {{ singer.name }}
-            <span v-if="singer.alias.length > 0 && !singer.trans">({{ singer.alias[0] }})</span>
-            <span v-if="singer.trans">({{ singer.trans }})</span>
-            <svg-icon v-if="singer.accountId" icon-class="account" style="font-size:1.3rem" />
-          </div>
+    <div v-show="!loading" class="singer-main">
+      <div v-for="singer in topSingerList" :key="singer.id" class="singer-item">
+        <div class="singer-pic">
+          <img :src="singer.picUrl">
         </div>
-      </transition-group>
+        <div class="singer-name">
+          {{ singer.name }}
+          <span v-if="singer.alias.length > 0 && !singer.trans">({{ singer.alias[0] }})</span>
+          <span v-if="singer.trans">({{ singer.trans }})</span>
+          <svg-icon v-if="singer.accountId" icon-class="account" style="font-size:1.3rem" />
+        </div>
+      </div>
     </div>
     <div v-show="!loading" class="load-more" @click="loadMore(loadMoreOption)">加载更多</div>
     <div v-show="loading" class="sk-chase">
@@ -114,11 +112,13 @@ export default {
       this.$router.go(-1)
     },
     selectCountry(country) {
+      this.loading = true
       this.countryList.map(item => { item.isActive = false })
       country.isActive = true
       this.countrySelected = country.code
       getArtistsList({ cat: country.code + 1, limit: 20 }).then(res => {
         this.topSingerList = res.artists
+        this.loading = false
         this.sexList.map(item => { item.isActive = false })
         this.sexList[0].isActive = true
         this.loadMoreOption = null
@@ -136,9 +136,11 @@ export default {
     selectSex(sex) {
       this.sexList.map(item => { item.isActive = false })
       sex.isActive = true
+      this.loading = true
       this.sexSelected = sex.code
       getArtistsList({ cat: this.countrySelected + sex.code, limit: 20 }).then(res => {
         this.topSingerList = res.artists
+        this.loading = false
         this.loadMoreOption = null
         this.loadMoreOption = {
           params: {
@@ -249,6 +251,7 @@ $neteaseRed: #d81e06;
   width: 35px;
   height: 35px;
   margin: 0 auto;
+  margin-top:2rem;
   position: relative;
   animation: sk-chase 2.5s infinite linear both;
 }

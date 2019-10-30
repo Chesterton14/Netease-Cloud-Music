@@ -127,6 +127,7 @@ export default {
       keyword: '',
       showKeyword: '',
       swiperOption: {
+        effect: 'fade',
         autoplay: true,
         loop: true,
         mousewheel: true,

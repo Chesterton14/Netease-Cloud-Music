@@ -3,43 +3,60 @@
     <div class="singer-nav">
       <div @click="goBack"><svg-icon icon-class="back" /></div>
       <div class="nav-title">歌手分类</div>
-      <div @click="goBack"><svg-icon icon-class="rank" />></div>
+      <div @click="goBack"><svg-icon icon-class="rank" /></div>
     </div>
     <div style="width:100%;height:5.5rem" />
     <div class="singer-category">
       <div class="singer-country">
-        <div class="country-item">华语</div>
-        <div class="country-item">欧美</div>
-        <div class="country-item">日本</div>
-        <div class="country-item">韩国</div>
-        <div class="country-item">其他</div>
+        <div
+          v-for="country in countryList"
+          :key="country.code"
+          class="country-item"
+          :class="{active: country.isActive}"
+          @click="selectCountry(country)"
+        >{{ country.name }}</div>
       </div>
       <div class="singer-sex">
-        <div class="sex-item">男</div>
-        <div class="sex-item">女</div>
-        <div class="sex-item">乐队/组合</div>
+        <div
+          v-for="sex in sexList"
+          :key="sex.code"
+          class="sex-item"
+          :class="{active: sex.isActive}"
+          @click="selectSex(sex)"
+        >{{ sex.name }}</div>
       </div>
     </div>
     <div class="singer-title">热门歌手</div>
     <div class="singer-main">
-      <div v-for="singer in topSingerList" :key="singer.id" class="singer-item">
-        <div class="singer-pic">
-          <img :src="singer.picUrl">
+      <transition-group name="fade-transform" mode="out-in">
+        <div v-for="singer in topSingerList" :key="singer.id" class="singer-item">
+          <div class="singer-pic">
+            <img :src="singer.picUrl">
+          </div>
+          <div class="singer-name">
+            {{ singer.name }}
+            <span v-if="singer.alias.length > 0 && !singer.trans">({{ singer.alias[0] }})</span>
+            <span v-if="singer.trans">({{ singer.trans }})</span>
+            <svg-icon v-if="singer.accountId" icon-class="account" style="font-size:1.3rem" />
+          </div>
         </div>
-        <div class="singer-name">
-          {{ singer.name }}
-          <span v-if="singer.alias.length>0">({{ singer.alias[0] }})</span>
-          <svg-icon v-if="singer.accountId" icon-class="account" style="font-size:1.3rem" />
-        </div>
-      </div>
+      </transition-group>
     </div>
-    <div class="load-more" @click="loadMore">加载更多</div>
-    <div style="width:100%;height:5.5rem" />
+    <div v-show="!loading" class="load-more" @click="loadMore(loadMoreOption)">加载更多</div>
+    <div v-show="loading" class="sk-chase">
+      <div class="sk-chase-dot" />
+      <div class="sk-chase-dot" />
+      <div class="sk-chase-dot" />
+      <div class="sk-chase-dot" />
+      <div class="sk-chase-dot" />
+      <div class="sk-chase-dot" />
+    </div>
+    <div style="width:100%;height:6.5rem" />
   </div>
 </template>
 
 <script>
-import { getTopArtists } from '@/api/discover'
+import { getTopArtists, getArtistsList } from '@/api/discover'
 export default {
   data() {
     return {
@@ -47,29 +64,92 @@ export default {
         offset: 0,
         limit: 20
       },
-      topSingerList: []
+      loading: false,
+      topSingerList: [],
+      countryList: [
+        { name: '华语', code: 1000, isActive: false },
+        { name: '欧美', code: 2000, isActive: false },
+        { name: '日本', code: 6000, isActive: false },
+        { name: '韩国', code: 7000, isActive: false },
+        { name: '其他', code: 4000, isActive: false }
+      ],
+      sexList: [
+        { name: '男', code: 1, isActive: false },
+        { name: '女', code: 2, isActive: false },
+        { name: '乐队/组合', code: 3, isActive: false }
+      ],
+      countrySelected: undefined,
+      sexSelected: undefined,
+      loadMoreOption: {
+        params: {
+          offset: 0,
+          limit: 20
+        },
+        fn: getTopArtists,
+        data: undefined
+      }
     }
   },
   created() {
     this.params.offset = 0
     getTopArtists(this.params).then(res => {
       this.topSingerList = res.artists
+      this.loadMoreOption.data = res.artists
     })
   },
   methods: {
     initData() {
     },
-    loadMore() {
-      this.params.offset = this.params.offset + this.params.limit
-      getTopArtists(this.params).then(res => {
-        console.log(res)
+    loadMore(option) {
+      this.loading = true
+      option.params.offset = option.params.offset + option.params.limit
+      option.fn(option.params).then(res => {
         res.artists.map(item => {
-          this.topSingerList.push(item)
+          option.data.push(item)
         })
+        this.loading = false
       })
     },
     goBack() {
       this.$router.go(-1)
+    },
+    selectCountry(country) {
+      this.countryList.map(item => { item.isActive = false })
+      country.isActive = true
+      this.countrySelected = country.code
+      getArtistsList({ cat: country.code + 1, limit: 20 }).then(res => {
+        this.topSingerList = res.artists
+        this.sexList.map(item => { item.isActive = false })
+        this.sexList[0].isActive = true
+        this.loadMoreOption = null
+        this.loadMoreOption = {
+          params: {
+            offset: 0,
+            limit: 20,
+            cat: country.code + 1
+          },
+          fn: getArtistsList,
+          data: this.topSingerList
+        }
+      })
+    },
+    selectSex(sex) {
+      this.sexList.map(item => { item.isActive = false })
+      sex.isActive = true
+      this.sexSelected = sex.code
+      getArtistsList({ cat: this.countrySelected + sex.code, limit: 20 }).then(res => {
+        this.topSingerList = res.artists
+        this.loadMoreOption = null
+        this.loadMoreOption = {
+          params: {
+            offset: 0,
+            limit: 20,
+            cat: this.countrySelected + sex.code
+          },
+          fn: getArtistsList,
+          data: this.topSingerList
+        }
+      })
     }
   }
 }
@@ -104,6 +184,9 @@ $neteaseRed: #d81e06;
   .singer-category{
     width:100%;
     padding: 1rem 0;
+    .active{
+      color: $neteaseRed !important;
+    }
     .singer-country{
       display: flex;
       justify-content: flex-start;
@@ -157,6 +240,64 @@ $neteaseRed: #d81e06;
     text-align: center;
     font-size: 1.5rem;
     color:#646464;
+  }
+}
+</style>
+
+<style>
+.sk-chase {
+  width: 35px;
+  height: 35px;
+  margin: 0 auto;
+  position: relative;
+  animation: sk-chase 2.5s infinite linear both;
+}
+
+.sk-chase-dot {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  animation: sk-chase-dot 2.0s infinite ease-in-out both;
+}
+
+.sk-chase-dot:before {
+  content: '';
+  display: block;
+  width: 25%;
+  height: 25%;
+  background-color: #d81e06;
+  border-radius: 100%;
+  animation: sk-chase-dot-before 2.0s infinite ease-in-out both;
+}
+
+.sk-chase-dot:nth-child(1) { animation-delay: -1.1s; }
+.sk-chase-dot:nth-child(2) { animation-delay: -1.0s; }
+.sk-chase-dot:nth-child(3) { animation-delay: -0.9s; }
+.sk-chase-dot:nth-child(4) { animation-delay: -0.8s; }
+.sk-chase-dot:nth-child(5) { animation-delay: -0.7s; }
+.sk-chase-dot:nth-child(6) { animation-delay: -0.6s; }
+.sk-chase-dot:nth-child(1):before { animation-delay: -1.1s; }
+.sk-chase-dot:nth-child(2):before { animation-delay: -1.0s; }
+.sk-chase-dot:nth-child(3):before { animation-delay: -0.9s; }
+.sk-chase-dot:nth-child(4):before { animation-delay: -0.8s; }
+.sk-chase-dot:nth-child(5):before { animation-delay: -0.7s; }
+.sk-chase-dot:nth-child(6):before { animation-delay: -0.6s; }
+
+@keyframes sk-chase {
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes sk-chase-dot {
+  80%, 100% { transform: rotate(360deg); }
+}
+
+@keyframes sk-chase-dot-before {
+  50% {
+    transform: scale(0.4);
+  } 100%, 0% {
+    transform: scale(1.0);
   }
 }
 </style>

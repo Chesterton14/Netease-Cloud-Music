@@ -48,3 +48,12 @@ export function getTopArtists(params) {
     params
   })
 }
+
+// 获取歌手分类列表
+export function getArtistsList(params) {
+  return request({
+    url: '/artist/list',
+    method: 'get',
+    params
+  })
+}

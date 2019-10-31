@@ -45,7 +45,7 @@
             class="singer-item"
           >
             <div class="singer-pic">
-              <img :src="singer.picUrl">
+              <img v-lazy="singer.picUrl">
             </div>
             <div class="singer-name">
               {{ singer.name }}

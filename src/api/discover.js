@@ -19,7 +19,7 @@ export function getBanner() {
 // 获取推荐歌单(未登录)
 export function getSongList() {
   return request({
-    url: '/personalized?limit=6',
+    url: '/personalized?limit=9',
     method: 'get'
   })
 }
@@ -66,9 +66,19 @@ export function getDailySong() {
   })
 }
 
-export function getNewestSong() {
+// 获取热门歌单分类
+export function getHotSongListCat() {
   return request({
-    url: '/top/song?type=0',
+    url: '/playlist/hot',
     method: 'get'
+  })
+}
+
+// 获取热门歌单
+export function getHotSongList(params) {
+  return request({
+    url: '/top/playlist/highquality',
+    method: 'get',
+    params
   })
 }

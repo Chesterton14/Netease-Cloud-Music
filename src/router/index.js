@@ -34,6 +34,11 @@ const routes = [
         meta: {
           title: '每日推荐'
         }
+      },
+      {
+        path: 'songlist',
+        name: '歌单广场',
+        component: () => import('@/views/Home/songList.vue')
       }
     ]
   },

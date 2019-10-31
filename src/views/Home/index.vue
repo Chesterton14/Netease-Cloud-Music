@@ -17,10 +17,10 @@
       <div class="content">
         <div style="width:100%;height:5.5rem;background:#d81e06" />
         <div class="pull-container" />
-        <div class="swiper-container">
+        <div class="swiper-container" :style="bgStyle">
           <swiper v-if="swiperSlides.length" :options="swiperOption">
             <swiper-slide v-for="(slide, index) in swiperSlides" :key="index">
-              <img class="swiper-img" :src="slide.pic">
+              <img v-lazy="slide.pic" class="swiper-img">
             </swiper-slide>
             <div slot="pagination" class="swiper-pagination" />
           </swiper>
@@ -32,7 +32,7 @@
             </div>
             <span class="item-title">每日推荐</span>
           </div>
-          <div class="button-item" @click="toSongListPage">
+          <div class="button-item" @click="$router.push('/songlist')">
             <div class="item-icon">
               <svg-icon icon-class="songList" />
             </div>
@@ -64,7 +64,7 @@
         <div class="songList-square">
           <div v-for="songList in songListArray" :key="songList.id" class="songList-item">
             <div class="item-img">
-              <img :src="songList.picUrl" alt>
+              <img v-lazy="songList.picUrl">
             </div>
             <span class="item-title">{{ songList.name }}</span>
           </div>
@@ -76,7 +76,7 @@
         <div class="newest-container">
           <div v-for=" alnum in newestAlbumList" :key="alnum.id" class="newest-item">
             <div class="item-img">
-              <img :src="alnum.picUrl">
+              <img v-lazy="alnum.picUrl">
             </div>
             <span class="item-title">{{ alnum.name }}</span>
           </div>
@@ -96,7 +96,7 @@
               <div class="item-main">
                 <div class="main-search-word" :class="{searchTop3:index < 3}">
                   {{ search.searchWord }}
-                  <img v-if="search.iconUrl" :src="search.iconUrl">
+                  <img v-if="search.iconUrl" v-lazy="search.iconUrl">
                 </div>
                 <div class="main-search-content">{{ search.content }}</div>
               </div>
@@ -149,7 +149,12 @@ export default {
       songListArray: [],
       newestAlbumList: [],
       isSearch: false,
-      hotSearchList: []
+      hotSearchList: [],
+      bgStyle: {
+        backgroundImage: 'url(' + require('../../assets/redbg.png') + ')',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: '100% 5rem'
+      }
     }
   },
   created() {
@@ -164,7 +169,7 @@ export default {
       this.showKeyword = searchDefaultData.data.showKeyword
       this.swiperSlides = bannerImg.banners
       this.songListArray = songList.result
-      this.newestAlbumList = newestAlbum.albums.slice(0, 3)
+      this.newestAlbumList = newestAlbum.albums.slice(0, 6)
       this.$nextTick(() => {
         this.scroll = new BScroll(this.$refs.wrapper, { click: true })
       })
@@ -239,11 +244,11 @@ $neteaseRed: #d81e06;
   }
   .pull-container {
     position: absolute;
-    top: -30vh;
+    top: -20rem;
     z-index: -10;
     background: #d81e06;
     width: 100%;
-    height: 50vh;
+    height: 30rem;
     vertical-align: inherit;
   }
   .swiper-container {

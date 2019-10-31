@@ -19,7 +19,7 @@
         <div v-for="item in songList" :key="item.id" class="main-item">
           <div class="item-container">
             <div class="item-img">
-              <img :src="item.song.album.picUrl">
+              <img v-lazy="item.song.album.picUrl">
             </div>
             <div class="item-info">
               <div class="item-name">{{ item.name }}</div>

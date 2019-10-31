@@ -12,12 +12,12 @@
         <svg-icon icon-class="singer" />
       </div>
     </div>
+    <!-- 发现页主页 -->
     <div v-show="!isSearch" ref="wrapper" class="wrapper">
       <div class="content">
-        <!-- <transition-group name="fade-transform" mode="out-in"> -->
-        <div class="pull-container" />
         <div style="width:100%;height:5.5rem;background:#d81e06" />
-        <div class="swiper-container" :style="bgStyle">
+        <div class="pull-container" />
+        <div class="swiper-container">
           <swiper v-if="swiperSlides.length" :options="swiperOption">
             <swiper-slide v-for="(slide, index) in swiperSlides" :key="index">
               <img class="swiper-img" :src="slide.pic">
@@ -82,14 +82,11 @@
           </div>
         </div>
         <div class="bottom-content" />
-        <!-- </transition-group> -->
       </div>
     </div>
-    <!-- 发现页主页 -->
-
     <!-- 搜索建议 -->
-    <transition name="fade-transform" mode="out-in">
-      <div v-show="isSearch" class="search-container">
+    <div v-show="isSearch" ref="searchWrapper" class="search-container">
+      <div class="search-content">
         <div style="width:100%;height:5.5rem;" />
         <div class="search-title">热搜榜</div>
         <div class="search-list">
@@ -111,7 +108,7 @@
         </div>
         <div style="width:100%;height:5.5rem" />
       </div>
-    </transition>
+    </div>
   </div>
 </template>
 
@@ -152,12 +149,7 @@ export default {
       songListArray: [],
       newestAlbumList: [],
       isSearch: false,
-      hotSearchList: [],
-      bgStyle: {
-        backgroundImage: 'url(' + require('../../assets/redbg.png') + ')',
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: '100% 30%'
-      }
+      hotSearchList: []
     }
   },
   created() {
@@ -181,6 +173,9 @@ export default {
       this.isSearch = true
       getHotSearch().then(res => {
         this.hotSearchList = res.data
+        this.$nextTick(() => {
+          this.searchScroll = new BScroll(this.$refs.searchWrapper, { click: true })
+        })
       })
     },
     backToMain() {
@@ -203,7 +198,7 @@ $neteaseRed: #d81e06;
   width: 100%;
   height: 100%;
   background: #fff;
-  .wrapper{
+  .wrapper {
     width: 100%;
     height: 100%;
   }
@@ -242,7 +237,7 @@ $neteaseRed: #d81e06;
       margin-top: 1rem;
     }
   }
-  .pull-container{
+  .pull-container {
     position: absolute;
     top: -30vh;
     z-index: -10;
@@ -389,7 +384,9 @@ $neteaseRed: #d81e06;
     height: 5rem;
   }
   .search-container {
+    position: fixed;
     width: 100%;
+    height: 100%;
     .search-title {
       padding: 2rem 2rem 1rem 2rem;
       font-size: 1.3rem;

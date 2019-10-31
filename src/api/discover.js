@@ -65,3 +65,10 @@ export function getDailySong() {
     method: 'get'
   })
 }
+
+export function getNewestSong() {
+  return request({
+    url: '/top/song?type=0',
+    method: 'get'
+  })
+}

@@ -120,7 +120,7 @@ $neteaseRed: #d81e06;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding:1rem;
+      padding:1.5rem 1rem;
       .item-container{
         display: flex;
         justify-content: flex-start;

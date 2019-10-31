@@ -6,62 +6,72 @@
       <div @click="$router.go(-1)"><svg-icon icon-class="rank" /></div>
     </div>
     <div style="width:100%;height:5.5rem" />
-    <div class="singer-category">
-      <div class="singer-country">
-        <div
-          v-for="country in countryList"
-          :key="country.code"
-          class="country-item"
-          :class="{active: country.isActive}"
-          @click="selectCountry(country)"
-        >{{ country.name }}</div>
-      </div>
-      <div class="singer-sex">
-        <div
-          v-for="sex in sexList"
-          :key="sex.code"
-          class="sex-item"
-          :class="{active: sex.isActive}"
-          @click="selectSex(sex)"
-        >{{ sex.name }}</div>
-      </div>
-    </div>
-    <div class="singer-title">热门歌手</div>
-    <div class="singer-main">
-      <div v-show="mainLoading" class="sk-chase">
-        <div class="sk-chase-dot" />
-        <div class="sk-chase-dot" />
-        <div class="sk-chase-dot" />
-        <div class="sk-chase-dot" />
-        <div class="sk-chase-dot" />
-        <div class="sk-chase-dot" />
-      </div>
-      <div v-for="singer in topSingerList" v-show="!mainLoading" :key="singer.id" class="singer-item">
-        <div class="singer-pic">
-          <img :src="singer.picUrl">
+    <div ref="singerWrapper" class="singerWrapper">
+      <div class="singer-content">
+        <div class="singer-category">
+          <div class="singer-country">
+            <div
+              v-for="country in countryList"
+              :key="country.code"
+              class="country-item"
+              :class="{active: country.isActive}"
+              @click="selectCountry(country)"
+            >{{ country.name }}</div>
+          </div>
+          <div class="singer-sex">
+            <div
+              v-for="sex in sexList"
+              :key="sex.code"
+              class="sex-item"
+              :class="{active: sex.isActive}"
+              @click="selectSex(sex)"
+            >{{ sex.name }}</div>
+          </div>
+          <div class="singer-title">热门歌手</div>
         </div>
-        <div class="singer-name">
-          {{ singer.name }}
-          <span v-if="singer.alias.length > 0 && !singer.trans">({{ singer.alias[0] }})</span>
-          <span v-if="singer.trans">({{ singer.trans }})</span>
-          <svg-icon v-if="singer.accountId" icon-class="account" style="font-size:1.3rem" />
+        <div class="singer-main">
+          <div v-show="mainLoading" class="sk-chase">
+            <div class="sk-chase-dot" />
+            <div class="sk-chase-dot" />
+            <div class="sk-chase-dot" />
+            <div class="sk-chase-dot" />
+            <div class="sk-chase-dot" />
+            <div class="sk-chase-dot" />
+          </div>
+          <div
+            v-for="singer in topSingerList"
+            v-show="!mainLoading"
+            :key="singer.id"
+            class="singer-item"
+          >
+            <div class="singer-pic">
+              <img :src="singer.picUrl">
+            </div>
+            <div class="singer-name">
+              {{ singer.name }}
+              <span v-if="singer.alias.length > 0 && !singer.trans">({{ singer.alias[0] }})</span>
+              <span v-if="singer.trans">({{ singer.trans }})</span>
+              <svg-icon v-if="singer.accountId" icon-class="account" style="font-size:1.3rem" />
+            </div>
+          </div>
         </div>
+        <div v-show="!loading && !mainLoading" class="load-more">已经到底啦</div>
+        <div v-show="loading" class="sk-chase">
+          <div class="sk-chase-dot" />
+          <div class="sk-chase-dot" />
+          <div class="sk-chase-dot" />
+          <div class="sk-chase-dot" />
+          <div class="sk-chase-dot" />
+          <div class="sk-chase-dot" />
+        </div>
+        <div style="width:100%;height:12.5rem" />
       </div>
     </div>
-    <div v-show="!loading && !mainLoading" class="load-more" @click="loadMore(loadMoreOption)">加载更多</div>
-    <div v-show="loading" class="sk-chase">
-      <div class="sk-chase-dot" />
-      <div class="sk-chase-dot" />
-      <div class="sk-chase-dot" />
-      <div class="sk-chase-dot" />
-      <div class="sk-chase-dot" />
-      <div class="sk-chase-dot" />
-    </div>
-    <div style="width:100%;height:6.5rem" />
   </div>
 </template>
 
 <script>
+import BScroll from 'better-scroll'
 import { getTopArtists, getArtistsList } from '@/api/discover'
 export default {
   data() {
@@ -104,6 +114,17 @@ export default {
       this.topSingerList = res.artists
       this.loadMoreOption.data = res.artists
       this.mainLoading = false
+      this.$nextTick(() => {
+        this.singerScroll = new BScroll(this.$refs.singerWrapper, {
+          click: true,
+          pullUpLoad: {
+            threshold: 100
+          }
+        })
+        this.singerScroll.on('pullingUp', () => {
+          this.loadMore(this.loadMoreOption)
+        })
+      })
     })
   },
   methods: {
@@ -117,6 +138,7 @@ export default {
           option.data.push(item)
         })
         this.loading = false
+        this.singerScroll.finishPullUp()
       })
     },
     selectCountry(country) {
@@ -180,6 +202,7 @@ $neteaseRed: #d81e06;
     justify-content: space-between;
     align-items: center;
     background-color:$neteaseRed;
+    z-index:1000;
     .nav-title{
       flex:2;
       font-size: 1.5rem;
@@ -224,25 +247,34 @@ $neteaseRed: #d81e06;
     color:#272727;
     font-size:1.2rem;
   }
-  .singer-main{
-    .singer-item{
-      display: flex;
-      align-items: center;
-      padding: 1rem;
-      .singer-pic{
-        img{
-          border-radius: 50%;
-          width: 4rem;
-          height: 4rem;
+  .singerWrapper{
+    width:100%;
+    height: 100%;
+    position: fixed;
+    top:5.5rem;
+    left:0;
+    z-index:100;
+    .singer-main{
+      .singer-item{
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        .singer-pic{
+          img{
+            border-radius: 50%;
+            width: 4rem;
+            height: 4rem;
+          }
         }
-      }
-      .singer-name{
-        text-align: center;
-        font-size: 1.3rem;
-        padding: 0 1rem;
+        .singer-name{
+          text-align: center;
+          font-size: 1.3rem;
+          padding: 0 1rem;
+        }
       }
     }
   }
+
   .load-more{
     width:100%;
     box-sizing: border-box;

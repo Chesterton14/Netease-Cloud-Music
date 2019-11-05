@@ -59,7 +59,6 @@ export default {
     getHotSongListCat().then(res => {
       this.songListCatData = res.tags
       this.songListCatData.map(item => { item.isActive = false })
-      console.log(this.songListCatData)
       this.$nextTick(() => {
         this.songlistCatScroll = new BScroll(this.$refs.songlistCat, {
           startX: 0,
@@ -89,13 +88,11 @@ export default {
   },
   methods: {
     loadMore() {
-      console.log(this.updateTime, 'before')
       this.options.before = this.updateTime
       getHotSongList(this.options).then(res => {
         this.loading = true
         const { playlists } = res
         this.updateTime = playlists[playlists.length - 1].updateTime
-        console.log(this.updateTime, 'later')
         playlists.map(item => { this.songListData.push(item) })
         this.loading = false
         this.songlistScroll.finishPullUp()

@@ -39,6 +39,11 @@ const routes = [
         path: 'songlist',
         name: '歌单广场',
         component: () => import('@/views/Home/songList.vue')
+      },
+      {
+        path: 'toplist',
+        name: '排行榜',
+        component: () => import('@/views/Home/topList.vue')
       }
     ]
   },

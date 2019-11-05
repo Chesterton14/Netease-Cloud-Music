@@ -58,7 +58,7 @@ export default {
       this.$nextTick(() => {
         this.scroll = new BScroll(this.$refs.wrapper, { click: true })
       })
-    })
+    }).catch(error => { console.log(error) })
   }
 }
 </script>

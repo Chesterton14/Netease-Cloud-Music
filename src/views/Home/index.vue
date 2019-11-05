@@ -3,12 +3,12 @@
     <!-- 顶部导航 -->
     <div class="discovery-nav">
       <svg-icon v-if="!isSearch" icon-class="mike" />
-      <div v-if="isSearch" class="left-icon" @click="backToMain">
+      <div v-if="isSearch" class="left-icon" @click="isSearch = false">
         <svg-icon icon-class="back" />
       </div>
       <input v-model="keyword" type="text" :placeholder="showKeyword" @focus="onFocus">
       <svg-icon v-if="!isSearch" icon-class="rank" class="right-icon" />
-      <div v-if="isSearch" class="left-icon" @click="toSingerPage">
+      <div v-if="isSearch" class="left-icon" @click="$router.push('singer')">
         <svg-icon icon-class="singer" />
       </div>
     </div>
@@ -38,13 +38,13 @@
             </div>
             <span class="item-title">歌单</span>
           </div>
-          <div class="button-item" @click="toRankListPage">
+          <div class="button-item" @click="$router.push('/toplist')">
             <div class="item-icon">
               <svg-icon icon-class="rankList" />
             </div>
             <span class="item-title">排行榜</span>
           </div>
-          <div class="button-item" @click="toRadioPage">
+          <div class="button-item">
             <div class="item-icon">
               <svg-icon icon-class="radio" />
             </div>
@@ -182,16 +182,7 @@ export default {
           this.searchScroll = new BScroll(this.$refs.searchWrapper, { click: true })
         })
       })
-    },
-    backToMain() {
-      this.isSearch = false
-    },
-    toSingerPage() {
-      this.$router.push('singer')
-    },
-    toSongListPage() {},
-    toRankListPage() {},
-    toRadioPage() {}
+    }
   }
 }
 </script>

@@ -82,3 +82,10 @@ export function getHotSongList(params) {
     params
   })
 }
+
+// 获取所有榜单内容摘要
+export function getHotList() {
+  return request({
+    url: '/toplist/detail'
+  })
+}

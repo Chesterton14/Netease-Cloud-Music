@@ -6,8 +6,8 @@
         <svg-icon icon-class="rank" />
       </div>
       <div class="date-container">
-        <span style="font-size:4rem">30</span>
-        <span>/10</span>
+        <span style="font-size:4rem">{{ date }}</span>
+        <span>/{{ month }}</span>
       </div>
       <div class="daily-main">
         <div class="main-nav">
@@ -21,7 +21,7 @@
             <div class="item-img">
               <img v-lazy="item.song.album.picUrl">
             </div>
-            <div class="item-info">
+            <div class="item-info" @click="toPlayer(item)">
               <div class="item-name">{{ item.name }}</div>
               <div class="item-detail">
                 <span v-for="(artist, index) in item.song.artists" :key="artist.id">
@@ -48,17 +48,35 @@ import { getDailySong } from '@/api/discover'
 export default {
   data() {
     return {
-      songList: []
+      songList: [],
+      date: undefined,
+      month: undefined
     }
   },
   created() {
+    this.date = new Date().getDate().toString().length > 1 ? new Date().getDate() : '0' + new Date().getDate().toString()
+    this.month = new Date().getMonth() + 1
     getDailySong().then(res => {
-      console.log(res)
       this.songList = res.result
       this.$nextTick(() => {
         this.scroll = new BScroll(this.$refs.wrapper, { click: true })
       })
     }).catch(error => { console.log(error) })
+  },
+  methods: {
+    toPlayer(item) {
+      const data = {
+        img: item.song.album.picUrl,
+        name: item.name,
+        artists: []
+      }
+      item.song.artists.map(item => { data.artists.push(item.name) })
+      this.$store.dispatch('getSongUrlX', { id: item.id }).then(res => {
+        this.$store.dispatch('getSong', data).then(res => {
+          this.$router.push('/player')
+        })
+      })
+    }
   }
 }
 </script>

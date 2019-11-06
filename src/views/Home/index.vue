@@ -7,7 +7,9 @@
         <svg-icon icon-class="back" />
       </div>
       <input v-model="keyword" type="text" :placeholder="showKeyword" @focus="onFocus">
-      <svg-icon v-if="!isSearch" icon-class="rank" class="right-icon" />
+      <div @click="$router.push('/player')">
+        <svg-icon v-if="!isSearch" icon-class="rank" class="right-icon" />
+      </div>
       <div v-if="isSearch" class="left-icon" @click="$router.push('singer')">
         <svg-icon icon-class="singer" />
       </div>
@@ -59,12 +61,22 @@
         </div>
         <div class="songList-nav">
           <div class="nav-title">推荐歌单</div>
-          <div class="nav-button">歌单广场</div>
+          <div class="nav-button" @click="$router.push('/songlist')">歌单广场</div>
         </div>
         <div class="songList-square">
           <div v-for="songList in songListArray" :key="songList.id" class="songList-item">
             <div class="item-img">
               <img v-lazy="songList.picUrl">
+              <div class="play-times">
+                <svg-icon icon-class="playTimes" />
+                <span v-if="songList.playCount.toString().length >5">
+                  {{ songList.playCount.toString().slice(0,songList.playCount.toString().length-4) }}
+                  万
+                </span>
+                <span v-else>
+                  {{ songList.playCount }}
+                </span>
+              </div>
             </div>
             <span class="item-title">{{ songList.name }}</span>
           </div>
@@ -307,9 +319,21 @@ $neteaseRed: #d81e06;
       box-sizing: border-box;
       width: 33.33%;
       padding: 1rem;
+      position: relative;
       .item-img {
         img {
           width: 100%;
+          border-radius: 0.5rem;
+        }
+        .play-times{
+          position: absolute;
+          top:1.3rem;
+          right:1.5rem;
+          font-size: 1rem;
+          color: #fff;
+          .svg-icon{
+            font-size:1.2rem;
+          }
         }
       }
     }
@@ -324,6 +348,16 @@ $neteaseRed: #d81e06;
       margin-bottom: 0.3rem;
     }
   }
+  .play-times{
+      position: absolute;
+      top:1.3rem;
+      right:1.5rem;
+      font-size: 1rem;
+      color: #fff;
+      .svg-icon{
+        font-size:1.2rem;
+      }
+    }
   .newest-nav {
     widows: 100%;
     height: 2rem;
@@ -361,6 +395,7 @@ $neteaseRed: #d81e06;
       .item-img {
         img {
           width: 100%;
+          border-radius: 0.5rem;
         }
       }
       .item-title {

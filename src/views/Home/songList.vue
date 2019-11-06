@@ -18,12 +18,46 @@
     </div>
     <div ref="songlistMain" class="songlist-main">
       <div class="main-content">
+        <div v-if="!clickCat" class="swiper-container">
+          <swiper v-if="swiperSlides.length" :options="swiperOption">
+            <swiper-slide
+              v-for="(slide, index) in swiperSlides"
+              :key="index"
+              style="border: 1px solid #f1f1f1;background-color: #fff"
+            >
+              <img v-lazy="slide.coverImgUrl" class="swiper-img">
+              <div class="play-times">
+                <svg-icon icon-class="playTimes" />
+                <span v-if="slide.playCount.toString().length >5">
+                  {{ slide.playCount.toString().slice(0,slide.playCount.toString().length-4) }}
+                  万
+                </span>
+                <span v-else>
+                  {{ slide.playCount }}
+                </span>
+              </div>
+              <div class="songlist-name">
+                {{ slide.name }}
+              </div>
+            </swiper-slide>
+          </swiper>
+        </div>
         <div
           v-for="songlist in songListData"
           :key="songlist.id"
           class="songlist-item"
         >
           <img v-lazy="songlist.coverImgUrl">
+          <div class="play-times">
+            <svg-icon icon-class="playTimes" />
+            <span v-if="songlist.playCount.toString().length >5">
+              {{ songlist.playCount.toString().slice(0,songlist.playCount.toString().length-4) }}
+              万
+            </span>
+            <span v-else>
+              {{ songlist.playCount }}
+            </span>
+          </div>
           <div class="songlist-name">
             {{ songlist.name }}
           </div>
@@ -42,7 +76,13 @@
 <script>
 import BScroll from 'better-scroll'
 import { getHotSongListCat, getHotSongList } from '@/api/discover'
+import 'swiper/dist/css/swiper.css'
+import { swiper, swiperSlide } from 'vue-awesome-swiper'
 export default {
+  components: {
+    swiper,
+    swiperSlide
+  },
   data() {
     return {
       songListCatData: [],
@@ -52,7 +92,28 @@ export default {
       options: {
         limit: 15,
         before: undefined
-      }
+      },
+      clickCat: false,
+      swiperOption: {
+        effect: 'coverflow',
+        mousewheel: true,
+        slidesPerView: 3,
+        centeredSlides: true,
+        initialSlide: 1,
+        coverflowEffect: {
+          rotate: 10,
+          stretch: 0,
+          depth: 100,
+          modifier: 3,
+          slideShadows: false
+        }
+        // pagination: {
+        //   el: '.swiper-pagination',
+        //   type: 'bullets',
+        //   bulletClass: 'swiper-pagination-bullet'
+        // }
+      },
+      swiperSlides: []
     }
   },
   created() {
@@ -72,9 +133,10 @@ export default {
     getHotSongList({ limit: 15 }).then(res => {
       this.loading = true
       const { playlists } = res
-      this.songListData = playlists
+      this.songListData = playlists.slice(3)
       this.loading = false
       this.updateTime = playlists[playlists.length - 1].updateTime
+      this.swiperSlides = playlists.slice(0, 3)
       this.$nextTick(() => {
         this.songlistScroll = new BScroll(this.$refs.songlistMain, {
           click: true,
@@ -102,6 +164,7 @@ export default {
       })
     },
     catClick(cat) {
+      this.clickCat = true
       this.loading = true
       this.songListData = null
       this.songListCatData.map(item => { item.isActive = false })
@@ -182,12 +245,42 @@ export default {
       align-items: center;
       width: 100%;
       z-index:10;
+      .swiper-container{
+        img{
+          width:100%;
+          position: relative;
+        }
+        .play-times{
+          position: absolute;
+          top:0.5rem;
+          right:0rem;
+          font-size: 1rem;
+          color: #fff;
+          .svg-icon{
+            font-size:1.2rem;
+          }
+        }
+        .songlist-name{
+          padding: 0.5rem 1rem;
+        }
+      }
       .songlist-item{
         width: 33.33%;
         box-sizing:border-box;
         padding: 1rem;
+        position: relative;
         img{
           width: 100%;
+        }
+        .play-times{
+          position: absolute;
+          top:1.3rem;
+          right:1.5rem;
+          font-size: 1rem;
+          color: #fff;
+          .svg-icon{
+            font-size:1.2rem;
+          }
         }
         .songlist-name{
           width: 100%;

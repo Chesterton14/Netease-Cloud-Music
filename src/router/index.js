@@ -108,6 +108,11 @@ const routes = [
     ]
   },
   {
+    path: '/player',
+    name: '播放器',
+    component: () => import('@/components/Player')
+  },
+  {
     path: '/404',
     component: () => import('@/views/404'),
     hidden: true

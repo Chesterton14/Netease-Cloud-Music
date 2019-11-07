@@ -1,7 +1,7 @@
 <template>
-  <div class="player-container">
+  <div class="player-container" :class="{isShow: !songShow}">
     <div class="player-nav">
-      <div class="nav-left" @click="hidePlayer">
+      <div class="nav-left" @click="$store.commit('SET_SONGSHOW')">
         <svg-icon icon-class="back" />
       </div>
       <div class="nav-title">
@@ -36,6 +36,13 @@
           <svg-icon icon-class="more" />
         </div>
       </div>
+      <div class="process-container">
+        <div class="player-process">
+          <div class="process-left">{{ currentTimeText }}</div>
+          <div ref="load" class="load" />
+          <div class="process-right">{{ duration }}</div>
+        </div>
+      </div>
       <div class="player-contronl">
         <div>
           <svg-icon icon-class="prev" />
@@ -57,9 +64,17 @@ import { mapGetters } from 'vuex'
 export default {
   data() {
     return {
-      isActive: true,
-      isPlay: true,
-      isHide: false
+      isActive: false,
+      isPlay: false,
+      duration: undefined,
+      durationTime: undefined,
+      currentTime: undefined,
+      currentTimeText: '00:00',
+      timer: undefined,
+      over: false,
+      count: 0,
+      m: '00',
+      loadWidth: undefined
     }
   },
   computed: {
@@ -67,15 +82,74 @@ export default {
       'songUrl',
       'songImg',
       'songName',
-      'songArtists'
+      'songArtists',
+      'songShow'
     ])
   },
+  watch: {
+    songUrl() {
+      this.$refs.MyAudio.src = this.$store.state.songUrl
+      this.count = 0
+      this.over = false
+      this.$refs.MyAudio.addEventListener('loadeddata', () => {
+        this.$refs.MyAudio.play()
+        this.isPlay = true
+        this.isActive = true
+      })
+    },
+    currentTime() {
+      console.log('currentTime', this.currentTime)
+      let s = '00'
+      let cloneCurrentTime = this.currentTime
+      if (this.over) {
+        cloneCurrentTime = cloneCurrentTime - (this.count * 60)
+        s = '00'
+      }
+      console.log('cloneCurrentTime', cloneCurrentTime)
+      if (cloneCurrentTime < 10) {
+        s = `0${(cloneCurrentTime.toString()).split('')[0]}`
+      } else if (cloneCurrentTime < 60) {
+        s = `${(cloneCurrentTime.toString()).split('')[0]}${(cloneCurrentTime.toString()).split('')[1]}`
+      } else if (cloneCurrentTime > 60) {
+        this.over = true
+      }
+      console.log('s', s)
+      // eslint-disable-next-line eqeqeq
+      if (s == '59') {
+        this.count = this.count + 1
+        this.m = `0${this.count}`
+      }
+      this.currentTimeText = `${this.m}:${s}`
+      this.$refs.load.style.width = `${(this.currentTime / this.durationTime) * 100}%`
+      this.loadWidth = this.$refs.load.style.width
+    },
+    loadWidth() {
+      // eslint-disable-next-line eqeqeq
+      if (this.loadWidth == '100%') {
+        clearInterval(this.timer)
+      }
+    }
+  },
   mounted() {
-    // const MyAudio = document.getElementById('MyAudio')
-    // MyAudio.src = this.$store.state.songUrl
-    // MyAudio.play()
     this.$refs.MyAudio.src = this.$store.state.songUrl
-    this.$refs.MyAudio.play()
+    this.$refs.MyAudio.addEventListener('loadeddata', () => {
+      this.$refs.MyAudio.play()
+      this.durationTime = this.$refs.MyAudio.duration
+      this.isPlay = true
+      this.isActive = true
+      const durationArray = (this.$refs.MyAudio.duration / 60).toString().split('')
+      const ss = ((durationArray[2] + durationArray[3]) / 100 * 60).toString().split('')
+      if (ss.length === 2 || ss.indexOf('.') === 1) {
+        this.duration = `0${durationArray[0]}:0${ss[0]}`
+      } else if (ss.length === 1) {
+        this.duration = `0${durationArray[0]}:0${ss[0]}`
+      } else {
+        this.duration = `0${durationArray[0]}:${ss[0]}${ss[1]}`
+      }
+      this.timer = setInterval(() => {
+        this.currentTime = this.$refs.MyAudio.currentTime
+      }, 1000)
+    })
   },
   created() {
     // console.log(songUrl)
@@ -84,23 +158,24 @@ export default {
   },
   methods: {
     tapButton() {
-      this.isPlay = !this.isPlay
-      this.isActive = !this.isActive
       if (this.$refs.MyAudio.paused) {
         this.$refs.MyAudio.play()
+        this.isPlay = true
+        this.isActive = true
       } else {
         this.$refs.MyAudio.pause()
+        this.isPlay = false
+        this.isActive = false
       }
-    },
-    hidePlayer() {
-      console.log('click')
-      this.isHide = true
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.isShow{
+  display: none
+}
 .player-container{
   position: fixed;
   width: 100%;
@@ -109,6 +184,7 @@ export default {
   left: 0;
   background-image: radial-gradient(#bababa, #767676, #232323);
   transition: 0.3s all;
+  z-index: 10000;
   .player-nav{
     width: 100%;
     height: 5.5rem;
@@ -134,7 +210,7 @@ export default {
     position: fixed;
     top: 50%;
     left:50%;
-    margin-top: -12rem;
+    margin-top: -15rem;
     margin-left: -11rem;
 
     img{
@@ -181,6 +257,36 @@ export default {
     }
     to{
       transform: rotate(359deg)
+    }
+  }
+  .process-container{
+    padding: 1rem 0;
+    .player-process{
+      margin: 0 5rem;
+      height: 0.2rem;
+      border-radius: 1rem;
+      background-color: #929292;
+      z-index:1000000;
+      position:relative;
+      .load{
+        height:100%;
+        width:0;
+        background-color:#fff;
+      }
+      .process-left{
+        position: absolute;
+        top: -0.5rem;
+        left:-3rem;
+        font-size:1rem;
+        color: #fff;
+      }
+      .process-right{
+        position: absolute;
+        top: -0.5rem;
+        right:-3rem;
+        font-size:1rem;
+        color: #929292;
+      }
     }
   }
 }

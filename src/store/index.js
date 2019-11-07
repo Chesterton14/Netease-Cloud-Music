@@ -1,16 +1,17 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-
 Vue.use(Vuex)
 
 import { getSongUrl } from '@/api/player'
+import Message from '@/components/MessageBox'
 
 export default new Vuex.Store({
   state: {
     songImg: '',
     songUrl: '',
     songName: '',
-    songArtists: []
+    songArtists: [],
+    songShow: false
   },
   getters: {
     songImg(state) {
@@ -24,6 +25,9 @@ export default new Vuex.Store({
     },
     songArtists(state) {
       return state.songArtists
+    },
+    songShow(state) {
+      return state.songShow
     }
   },
   mutations: {
@@ -38,6 +42,9 @@ export default new Vuex.Store({
     },
     SET_SONGARTISTS(state, artists) {
       state.songArtists = artists
+    },
+    SET_SONGSHOW(state) {
+      state.songShow = !state.songShow
     }
   },
   actions: {
@@ -45,8 +52,16 @@ export default new Vuex.Store({
       return new Promise((resolve, reject) => {
         getSongUrl(params).then(res => {
           const { data } = res
-          commit('SET_SONGURL', data[0].url)
-          resolve()
+          if (data[0].url) {
+            commit('SET_SONGURL', data[0].url)
+            resolve()
+          } else {
+            Message({
+              message: '该歌曲不可播放',
+              duration: 2500
+            })
+            reject()
+          }
         }).catch(err => {
           reject(err)
         })

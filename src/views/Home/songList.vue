@@ -3,7 +3,7 @@
     <div class="songlist-nav">
       <div class="nav-left" @click="$router.push('/')"><svg-icon icon-class="back-b" /></div>
       <div class="nav-title">歌单广场</div>
-      <div class="nav-right"><svg-icon icon-class="rank-b" /></div>
+      <div class="nav-right" @click="$store.commit('SET_SONGSHOW')"><svg-icon icon-class="rank-b" /></div>
     </div>
     <div ref="songlistCat" class="songlist-cat">
       <div class="songlist-content">

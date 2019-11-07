@@ -7,7 +7,7 @@
         <svg-icon icon-class="back" />
       </div>
       <input v-model="keyword" type="text" :placeholder="showKeyword" @focus="onFocus">
-      <div @click="$router.push('/player')">
+      <div @click="$store.commit('SET_SONGSHOW')">
         <svg-icon v-if="!isSearch" icon-class="rank" class="right-icon" />
       </div>
       <div v-if="isSearch" class="left-icon" @click="$router.push('singer')">
@@ -242,6 +242,9 @@ $neteaseRed: #d81e06;
       padding: 0 1rem;
     }
     .left-icon {
+      margin-top: 1rem;
+    }
+    .right-icon{
       margin-top: 1rem;
     }
   }

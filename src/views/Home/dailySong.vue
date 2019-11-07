@@ -3,7 +3,7 @@
     <div class="content">
       <div class="daily-nav">
         <div @click="$router.push('/')"><svg-icon icon-class="back" /></div>
-        <svg-icon icon-class="rank" />
+        <div @click="$store.commit('SET_SONGSHOW')"><svg-icon icon-class="rank" /></div>
       </div>
       <div class="date-container">
         <span style="font-size:4rem">{{ date }}</span>
@@ -19,16 +19,16 @@
         <div v-for="item in songList" :key="item.id" class="main-item">
           <div class="item-container">
             <div class="item-img">
-              <img v-lazy="item.song.album.picUrl">
+              <img v-lazy="item.album.picUrl">
             </div>
             <div class="item-info" @click="toPlayer(item)">
               <div class="item-name">{{ item.name }}</div>
               <div class="item-detail">
-                <span v-for="(artist, index) in item.song.artists" :key="artist.id">
+                <span v-for="(artist, index) in item.artists" :key="artist.id">
                   {{ artist.name }}
-                  <span v-if="index != item.song.artists.length - 1">/</span>
+                  <span v-if="index != item.artists.length - 1">/</span>
                 </span>
-                <span>- {{ item.song.album.name }}</span>
+                <span>- {{ item.album.name }}</span>
               </div>
             </div>
           </div>
@@ -39,25 +39,34 @@
       </div>
       <div style="width:100%;height:5.5rem" />
     </div>
+    <Loading :loading="loading" />
   </div>
 </template>
 
 <script>
 import BScroll from 'better-scroll'
 import { getDailySong } from '@/api/discover'
+import Loading from '@/components/Loading'
+
 export default {
+  components: {
+    Loading
+  },
   data() {
     return {
       songList: [],
       date: undefined,
-      month: undefined
+      month: undefined,
+      loading: false
     }
   },
   created() {
-    this.date = new Date().getDate().toString().length > 1 ? new Date().getDate() : '0' + new Date().getDate().toString()
+    this.date = new Date().getDate().toString().length > 1
+      ? new Date().getDate()
+      : '0' + new Date().getDate().toString()
     this.month = new Date().getMonth() + 1
     getDailySong().then(res => {
-      this.songList = res.result
+      this.songList = res.data.slice(0, 25)
       this.$nextTick(() => {
         this.scroll = new BScroll(this.$refs.wrapper, { click: true })
       })
@@ -65,16 +74,21 @@ export default {
   },
   methods: {
     toPlayer(item) {
+      this.loading = true
       const data = {
-        img: item.song.album.picUrl,
+        img: item.album.picUrl,
         name: item.name,
         artists: []
       }
-      item.song.artists.map(item => { data.artists.push(item.name) })
-      this.$store.dispatch('getSongUrlX', { id: item.id }).then(res => {
+      item.artists.map(item => { data.artists.push(item.name) })
+      this.$store.dispatch('getSongUrlX', { id: item.id, br: 320000 }).then(res => {
         this.$store.dispatch('getSong', data).then(res => {
-          this.$router.push('/player')
+          this.$store.commit('SET_SONGSHOW')
+          this.loading = false
         })
+      }).catch(error => {
+        console.log(error)
+        this.loading = false
       })
     }
   }
@@ -106,10 +120,10 @@ $neteaseRed: #d81e06;
     }
   }
   .date-container {
-    height: 7.5rem;
-    line-height: 5.5rem;
+    padding-top: 5.5rem;
+    padding-bottom: 1rem;
     background-color: $neteaseRed;
-    padding-left:1rem;
+    padding-left: 1rem;
     span {
       display: inline-block;
       font-size: 2.5rem;

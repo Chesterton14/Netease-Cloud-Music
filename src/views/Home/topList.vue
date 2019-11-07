@@ -3,7 +3,7 @@
     <div class="toplist-nav">
       <div class="nav-icon" @click="$router.go(-1)"><svg-icon icon-class="back" /></div>
       <div class="nav-title">排行榜</div>
-      <svg-icon icon-class="rank" />
+      <div @click="$store.commit('SET_SONGSHOW')"><svg-icon icon-class="rank" /></div>
     </div>
     <div ref="toplist" class="toplist-wrapper">
       <div class="toplist-content">
@@ -100,7 +100,6 @@ export default {
   },
   created() {
     getHotList().then(res => {
-      console.log(res)
       this.artistToplist = res.artistToplist
       this.officeListData = res.list.slice(0, 4)
       this.recListData = res.list.slice(4, 10)

@@ -44,6 +44,11 @@ const routes = [
         path: 'toplist',
         name: '排行榜',
         component: () => import('@/views/Home/topList.vue')
+      },
+      {
+        path: 'search/:word',
+        name: '搜索结果页',
+        component: () => import('@/views/Home/searchResult.vue')
       }
     ]
   },

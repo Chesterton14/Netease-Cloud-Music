@@ -19,7 +19,7 @@
     </div>
     <audio id="MyAudio" ref="MyAudio" />
     <div class="song-img" :class="{active: isActive}">
-      <img :src="songImg" alt="">
+      <img v-lazy="songImg" alt="">
     </div>
     <div class="button-container">
       <div class="player-button">
@@ -40,6 +40,7 @@
         <div class="player-process">
           <div class="process-left">{{ currentTimeText }}</div>
           <div ref="load" class="load" />
+          <div ref="point" class="process-point" />
           <div class="process-right">{{ duration }}</div>
         </div>
       </div>
@@ -66,7 +67,7 @@ export default {
     return {
       isActive: false,
       isPlay: false,
-      duration: undefined,
+      duration: '00:00',
       durationTime: undefined,
       currentTime: undefined,
       currentTimeText: '00:00',
@@ -91,6 +92,7 @@ export default {
       this.$refs.MyAudio.src = this.$store.state.songUrl
       this.count = 0
       this.over = false
+      this.duration = '00:00'
       this.$refs.MyAudio.addEventListener('loadeddata', () => {
         this.$refs.MyAudio.play()
         this.isPlay = true
@@ -98,14 +100,14 @@ export default {
       })
     },
     currentTime() {
-      console.log('currentTime', this.currentTime)
+      // console.log('currentTime', this.currentTime)
       let s = '00'
       let cloneCurrentTime = this.currentTime
       if (this.over) {
         cloneCurrentTime = cloneCurrentTime - (this.count * 60)
         s = '00'
       }
-      console.log('cloneCurrentTime', cloneCurrentTime)
+      // console.log('cloneCurrentTime', cloneCurrentTime)
       if (cloneCurrentTime < 10) {
         s = `0${(cloneCurrentTime.toString()).split('')[0]}`
       } else if (cloneCurrentTime < 60) {
@@ -113,15 +115,22 @@ export default {
       } else if (cloneCurrentTime > 60) {
         this.over = true
       }
-      console.log('s', s)
+      // console.log('s', s)
       // eslint-disable-next-line eqeqeq
       if (s == '59') {
-        this.count = this.count + 1
-        this.m = `0${this.count}`
+        setTimeout(() => {
+          this.count = this.count + 1
+          this.m = `0${this.count}`
+        }, 100)
       }
       this.currentTimeText = `${this.m}:${s}`
       this.$refs.load.style.width = `${(this.currentTime / this.durationTime) * 100}%`
       this.loadWidth = this.$refs.load.style.width
+      this.$refs.point.style.left = `${(this.currentTime / this.durationTime) * 100}%`
+      if (this.$refs.MyAudio.paused) {
+        this.isPlay = false
+        this.isActive = false
+      }
     },
     loadWidth() {
       // eslint-disable-next-line eqeqeq
@@ -131,6 +140,13 @@ export default {
     }
   },
   mounted() {
+    // duration       audio的总长度
+    // currentTime    当前播放的长度
+    // paused         音乐是否暂停
+    // play           音乐是否播放
+    // .play()        控制音乐播放
+    // .paused()      控制音乐暂停
+    // 更多audio DOM 属性方法 https://www.w3school.com.cn/jsref/dom_obj_audio.asp
     this.$refs.MyAudio.src = this.$store.state.songUrl
     this.$refs.MyAudio.addEventListener('loadeddata', () => {
       this.$refs.MyAudio.play()
@@ -139,9 +155,11 @@ export default {
       this.isActive = true
       const durationArray = (this.$refs.MyAudio.duration / 60).toString().split('')
       const ss = ((durationArray[2] + durationArray[3]) / 100 * 60).toString().split('')
-      if (ss.length === 2 || ss.indexOf('.') === 1) {
+      if (ss.length === 2 && ss.indexOf('.') !== -1) {
         this.duration = `0${durationArray[0]}:0${ss[0]}`
       } else if (ss.length === 1) {
+        this.duration = `0${durationArray[0]}:0${ss[0]}`
+      } else if (ss.indexOf('.') !== -1) {
         this.duration = `0${durationArray[0]}:0${ss[0]}`
       } else {
         this.duration = `0${durationArray[0]}:${ss[0]}${ss[1]}`
@@ -262,7 +280,7 @@ export default {
   .process-container{
     padding: 1rem 0;
     .player-process{
-      margin: 0 5rem;
+      margin: 0 6rem;
       height: 0.2rem;
       border-radius: 1rem;
       background-color: #929292;
@@ -273,17 +291,26 @@ export default {
         width:0;
         background-color:#fff;
       }
+      .process-point{
+        width: 0.8rem;
+        height: 0.8rem;
+        border-radius: 50%;
+        background-color: #fff;
+        position: absolute;
+        top: -0.3rem;
+        left: 0;
+      }
       .process-left{
         position: absolute;
-        top: -0.5rem;
-        left:-3rem;
+        top: -0.4rem;
+        left:-4rem;
         font-size:1rem;
-        color: #fff;
+        color: #929292;
       }
       .process-right{
         position: absolute;
-        top: -0.5rem;
-        right:-3rem;
+        top: -0.4rem;
+        right:-4rem;
         font-size:1rem;
         color: #929292;
       }

@@ -2,8 +2,8 @@
   <div class="discovey-container">
     <!-- 顶部导航 -->
     <div class="discovery-nav">
-      <svg-icon v-if="!isSearch" icon-class="mike" />
-      <div v-if="isSearch" class="left-icon" @click="isSearch = false">
+      <svg-icon v-if="!isSearch && !isResult" icon-class="mike" />
+      <div v-if="isSearch || isResult" class="left-icon" @click="goBack()">
         <svg-icon icon-class="back" />
       </div>
       <input v-model="keyword" type="text" :placeholder="showKeyword" @focus="onFocus">
@@ -96,7 +96,7 @@
         <div class="bottom-content" />
       </div>
     </div>
-    <!-- 搜索建议 -->
+    <!-- 热搜列表 -->
     <div v-show="isSearch" ref="searchWrapper" class="search-container">
       <div class="search-content">
         <div style="width:100%;height:5.5rem;" />
@@ -121,6 +121,15 @@
         <div style="width:100%;height:5.5rem" />
       </div>
     </div>
+    <!-- 搜索建议页 -->
+    <div v-if="showSuggest" class="suggest-container">
+      <div class="suggest-default" @click="toSearchResult()">搜索"{{ keyword }}"</div>
+      <div v-for="item in searchResult" :key="item.keyword" class="suggest-item" @click="toSearchResult(item)">
+        <svg-icon icon-class="searchIcon" />
+        {{ item.keyword }}
+      </div>
+    </div>
+    <SearchResult v-if="isResult" :keywords="keyword" />
   </div>
 </template>
 
@@ -133,18 +142,22 @@ import {
   getNewestAlbum,
   getHotSearch
 } from '@/api/discover'
+import { searchSuggest } from '@/api/search'
 import 'swiper/dist/css/swiper.css'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
+import SearchResult from './searchResult'
 
 export default {
   name: 'Home',
   components: {
     swiper,
-    swiperSlide
+    swiperSlide,
+    SearchResult
   },
   data() {
     return {
       keyword: '',
+      keywordProps: '',
       showKeyword: '',
       swiperOption: {
         effect: 'fade',
@@ -166,7 +179,23 @@ export default {
         backgroundImage: 'url(' + require('../../assets/redbg.png') + ')',
         backgroundRepeat: 'no-repeat',
         backgroundSize: '100% 5rem'
+      },
+      searchResult: [],
+      isResult: false,
+      showSuggest: false
+    }
+  },
+  watch: {
+    keyword() {
+      if (!this.keyword) return
+      this.showSuggest = true
+      const params = {
+        keywords: this.keyword,
+        type: 'mobile'
       }
+      searchSuggest(params).then(res => {
+        this.searchResult = res.result.allMatch
+      })
     }
   },
   created() {
@@ -194,6 +223,27 @@ export default {
           this.searchScroll = new BScroll(this.$refs.searchWrapper, { click: true })
         })
       })
+    },
+    goBack() {
+      if (this.isSearch) {
+        this.isResult = false
+        this.isSearch = false
+      }
+      if (this.isResult) {
+        this.isResult = false
+        this.isSearch = true
+      }
+    },
+    toSearchResult(item) {
+      this.isSearch = false
+      this.isResult = true
+      this.showSuggest = false
+      if (item) {
+        this.keyword = item.keyword
+        this.keywordProps = item.keyword
+      } else {
+        this.keywordProps = this.keyword
+      }
     }
   }
 }
@@ -473,6 +523,34 @@ $neteaseRed: #d81e06;
           }
         }
       }
+    }
+  }
+  .suggest-container{
+    position:fixed;
+    top: 5.5rem;
+    left: 1.5rem;
+    right: 1.5rem;
+    z-index: 10000;
+    background-color: #fff;
+    border-top: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
+    .suggest-item{
+      padding: 1.5rem 1rem;
+      font-size: 1.3rem;
+      color: #707070;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    div:last-child{
+      border-bottom: none;
+    }
+    .svg-icon{
+      padding-right: 1rem;
+    }
+    .suggest-default{
+      padding: 1.5rem 1rem;
+      font-size: 1.3rem;
+      color: #3b70b3;
+      border-bottom: 1px solid #f5f5f5;
     }
   }
 }

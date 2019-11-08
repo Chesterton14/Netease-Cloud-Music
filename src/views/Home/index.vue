@@ -216,9 +216,11 @@ export default {
       })
     },
     onFocus() {
+      if (this.keyword !== '') {
+        this.showSuggest = true
+      }
       this.isSearch = true
       getHotSearch().then(res => {
-        console.log(res)
         this.hotSearchList = res.data
         this.$nextTick(() => {
           this.searchScroll = new BScroll(this.$refs.searchWrapper, { click: true })
@@ -233,6 +235,7 @@ export default {
       if (this.isResult) {
         this.isResult = false
         this.isSearch = true
+        this.keyword = ''
       }
     },
     toSearchResult(item) {

@@ -46,9 +46,9 @@ const routes = [
         component: () => import('@/views/Home/topList.vue')
       },
       {
-        path: 'search/:word',
-        name: '搜索结果页',
-        component: () => import('@/views/Home/searchResult.vue')
+        path: 'playlistdetail/:id',
+        name: '歌单详情页',
+        component: () => import('@/views/Home/playlistDetail.vue')
       }
     ]
   },

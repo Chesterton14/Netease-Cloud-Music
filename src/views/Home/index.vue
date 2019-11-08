@@ -64,7 +64,7 @@
           <div class="nav-button" @click="$router.push('/songlist')">歌单广场</div>
         </div>
         <div class="songList-square">
-          <div v-for="songList in songListArray" :key="songList.id" class="songList-item">
+          <div v-for="songList in songListArray" :key="songList.id" class="songList-item" @click="toDetail(songList)">
             <div class="item-img">
               <img v-lazy="songList.picUrl">
               <div class="play-times">
@@ -250,7 +250,6 @@ export default {
       }
     },
     hotToSearch(item) {
-      console.log(item)
       this.keyword = item.searchWord
       this.keywordProps = item.searchWord
       this.isSearch = false
@@ -258,6 +257,10 @@ export default {
       setTimeout(() => {
         this.showSuggest = false
       })
+    },
+    toDetail(item) {
+      console.log(item)
+      this.$router.push(`/playlistdetail/${item.id}`)
     }
   }
 }

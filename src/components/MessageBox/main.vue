@@ -19,7 +19,7 @@ export default {
         setTimeout(() => {
           this.$destroy(true)
           this.$el.parentNode.removeChild(this.$el)
-        }, 1000)
+        }, 2000)
       }, this.duration)
     }, 100)
   }
@@ -34,15 +34,17 @@ export default {
   border-color: #fde2e2;
   color: #f56c6c;
   top: -5.7rem;
-  left: 0;
-  right: 0;
+  left: 1rem;
+  right: 1rem;
+  border-radius: 1rem;
   transition: all 0.5s;
   text-align: center;
   font-size: 1.5rem;
   padding: 2rem;
   border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
 }
 .active {
-  top: 0;
+  top: 1rem;
 }
 </style>

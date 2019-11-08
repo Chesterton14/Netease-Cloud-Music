@@ -16,13 +16,19 @@
       </div>
       <div style="width:100%;height:12rem;" />
     </div>
+    <Loading :loading="loading" />
   </div>
 </template>
 
 <script>
 import BScroll from 'better-scroll'
 import { searchBykey, getAlbum } from '@/api/search'
+import Loading from '@/components/Loading'
+
 export default {
+  components: {
+    Loading
+  },
   props: {
     keywords: {
       required: true,
@@ -31,14 +37,14 @@ export default {
   },
   data() {
     return {
-      searchData: []
+      searchData: [],
+      loading: false
     }
   },
   watch: {
     keywords() {
       if (this.keywords) {
         searchBykey({ keywords: this.keywords }).then(res => {
-          console.log(res)
           this.searchData = res.result.songs
         })
       }
@@ -54,6 +60,7 @@ export default {
   },
   methods: {
     toPlayer(item) {
+      this.loading = true
       getAlbum({ id: item.album.id }).then(res => {
         const data = {
           img: res.album.picUrl,

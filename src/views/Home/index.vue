@@ -102,7 +102,7 @@
         <div style="width:100%;height:5.5rem;" />
         <div class="search-title">热搜榜</div>
         <div class="search-list">
-          <div v-for="(search,index) in hotSearchList" :key="search.score" class="search-item">
+          <div v-for="(search,index) in hotSearchList" :key="search.score" class="search-item" @click="hotToSearch(search)">
             <div class="item-left">
               <div class="item-rank" :class="{top3:index < 3}">{{ index + 1 }}</div>
               <div class="item-main">
@@ -218,6 +218,7 @@ export default {
     onFocus() {
       this.isSearch = true
       getHotSearch().then(res => {
+        console.log(res)
         this.hotSearchList = res.data
         this.$nextTick(() => {
           this.searchScroll = new BScroll(this.$refs.searchWrapper, { click: true })
@@ -244,6 +245,16 @@ export default {
       } else {
         this.keywordProps = this.keyword
       }
+    },
+    hotToSearch(item) {
+      console.log(item)
+      this.keyword = item.searchWord
+      this.keywordProps = item.searchWord
+      this.isSearch = false
+      this.isResult = true
+      setTimeout(() => {
+        this.showSuggest = false
+      })
     }
   }
 }

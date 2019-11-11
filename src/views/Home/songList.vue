@@ -46,6 +46,7 @@
           v-for="songlist in songListData"
           :key="songlist.id"
           class="songlist-item"
+          @click="toDetail(songlist)"
         >
           <img v-lazy="songlist.coverImgUrl">
           <div class="play-times">
@@ -175,6 +176,10 @@ export default {
         this.loading = false
         this.songlistScroll.off('pullingUp', this.loadMore)
       })
+    },
+    toDetail(item) {
+      console.log(item)
+      this.$router.push(`/playlistdetail/${item.id}`)
     }
   }
 }

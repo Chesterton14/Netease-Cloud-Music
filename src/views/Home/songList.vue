@@ -71,6 +71,7 @@
         <div style="width:100%;height:20rem" />
       </div>
     </div>
+    <Loading :loading="fullLoading" />
   </div>
 </template>
 
@@ -79,10 +80,14 @@ import BScroll from 'better-scroll'
 import { getHotSongListCat, getHotSongList } from '@/api/discover'
 import 'swiper/dist/css/swiper.css'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
+import { debounce } from '@/utils/index'
+import Loading from '@/components/Loading'
+
 export default {
   components: {
     swiper,
-    swiperSlide
+    swiperSlide,
+    Loading
   },
   data() {
     return {
@@ -90,6 +95,7 @@ export default {
       songListData: [],
       updateTime: undefined,
       loading: false,
+      fullLoading: false,
       options: {
         limit: 15,
         before: undefined
@@ -118,6 +124,7 @@ export default {
     }
   },
   created() {
+    this.fullLoading = true
     getHotSongListCat().then(res => {
       this.songListCatData = res.tags
       this.songListCatData.map(item => { item.isActive = false })
@@ -136,6 +143,7 @@ export default {
       const { playlists } = res
       this.songListData = playlists.slice(3)
       this.loading = false
+      this.fullLoading = false
       this.updateTime = playlists[playlists.length - 1].updateTime
       this.swiperSlides = playlists.slice(0, 3)
       this.$nextTick(() => {
@@ -145,15 +153,15 @@ export default {
             threshold: 30
           }
         })
-        this.songlistScroll.on('pullingUp', this.loadMore)
+        this.songlistScroll.on('pullingUp', debounce(this.loadMore, 2000))
       })
     })
   },
   methods: {
     loadMore() {
+      this.loading = true
       this.options.before = this.updateTime
       getHotSongList(this.options).then(res => {
-        this.loading = true
         const { playlists } = res
         this.updateTime = playlists[playlists.length - 1].updateTime
         playlists.map(item => { this.songListData.push(item) })

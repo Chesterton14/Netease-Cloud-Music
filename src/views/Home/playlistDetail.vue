@@ -96,20 +96,28 @@ export default {
   watch: {
     $route() {
       this.reset()
-      getPlaylistDetail({ id: this.$route.params.id }).then(res => {
-        this.coverImg = res.playlist.coverImgUrl
-        this.playlistName = res.playlist.name
-        this.playlistCreator = res.playlist.creator.nickname
-        this.playlistCreatorAvatar = res.playlist.creator.avatarUrl
-        this.playlistDescription = res.playlist.description
-        this.tracksLength = res.playlist.tracks.length
-        this.tracks = res.playlist.tracks
-        this.commentCount = res.playlist.commentCount
-        this.shareCount = res.playlist.shareCount
-      })
+      setTimeout(() => {
+        this.loading = true
+        getPlaylistDetail({ id: this.$route.params.id }).then(res => {
+          this.coverImg = res.playlist.coverImgUrl
+          this.playlistName = res.playlist.name
+          this.playlistCreator = res.playlist.creator.nickname
+          this.playlistCreatorAvatar = res.playlist.creator.avatarUrl
+          this.playlistDescription = res.playlist.description
+          this.tracksLength = res.playlist.tracks.length
+          this.tracks = res.playlist.tracks
+          this.commentCount = res.playlist.commentCount
+          this.shareCount = res.playlist.shareCount
+          this.loading = false
+        }).catch(err => {
+          console.log(err)
+          this.loading = false
+        })
+      }, 500)
     }
   },
   created() {
+    this.loading = true
     getPlaylistDetail({ id: this.$route.params.id }).then(res => {
       this.coverImg = res.playlist.coverImgUrl
       this.playlistName = res.playlist.name
@@ -120,6 +128,7 @@ export default {
       this.tracks = res.playlist.tracks
       this.commentCount = res.playlist.commentCount
       this.shareCount = res.playlist.shareCount
+      this.loading = false
     })
   },
   methods: {
@@ -131,6 +140,8 @@ export default {
       this.playlistDescription = ''
       this.tracksLength = undefined
       this.tracks = ''
+      this.commentCount = undefined
+      this.shareCount = undefined
     },
     toPlayer(item) {
       console.log(item)

@@ -12,7 +12,7 @@ service.interceptors.request.use(
   },
   error => {
     console.log(error)
-    return error
+    return Promise.reject(error)
   }
 )
 
@@ -27,7 +27,7 @@ service.interceptors.response.use(
     //   duration: 2500
     // })
     console.log(error.message)
-    return error
+    return Promise.reject(error)
   }
 )
 

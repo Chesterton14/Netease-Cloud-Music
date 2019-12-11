@@ -12,7 +12,7 @@ Vue.use(VueLazyload)
 
 Vue.config.productionTip = false;
 
-console.log(`当前环境:${process.env.NODE_ENV},后端接口:${process.env.VUE_APP_BASE_API}`)
+console.log(`当前环境:${process.env.NODE_ENV},后端接口:${process.env.VUE_APP_BASE_API}`);
 
 new Vue({
   router,

@@ -1,6 +1,6 @@
 <template>
   <div>
-    team
+    正在开发中。。。
   </div>
 </template>
 
